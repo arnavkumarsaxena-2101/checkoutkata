@@ -1,11 +1,32 @@
+server:
+  shutdown: graceful
 spring:
   application:
     name: checkoutkata
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 3000
 management:
   endpoints:
+    health:
+      probes:
+        enabled: true
     web:
       exposure:
-        include: loggers,health,info
+        include: loggers,health,info,prometheus
+  health:
+    group:
+      readiness:
+        include:
+          - db
+          - ping
+      liveness:
+        include:
+          - ping
 springdoc:
   api-docs:
     enabled: true         # GET /v3/api-docs

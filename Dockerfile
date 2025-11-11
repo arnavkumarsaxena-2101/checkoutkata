@@ -13,6 +13,8 @@ RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
 COPY --from=build /workspace/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
+RUN sed -i 's/port="8005"/port="-1"/' /usr/local/tomcat/conf/server.xml
+
 ENV CATALINA_OPTS="-Dspring.profiles.active=prod"
 ENV PORT=8080
 EXPOSE 8080
