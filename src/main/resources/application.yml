@@ -7,14 +7,21 @@ management:
       exposure:
         include: loggers,health,info
 springdoc:
-  server-url: https://api.company.com/checkout
   api-docs:
     enabled: true         # GET /v3/api-docs
   swagger-ui:
     enabled: true         # GET /swagger-ui/index.html
     path: /swagger-ui
+    urls:
+      - name: All
+        url: /v3/api-docs
+      - name: Checkout
+        url: /v3/api-docs/checkout
+      - name: Admin
+        url: /v3/api-docs/admin
+  server-url: ${PUBLIC_BASE_URL:localhost:8080}
   group-configs:
     - group: checkout
       packages-to-scan: com.product.service.checkoutkata.api
     - group: admin
-      packages-to-scan: com.product.service.checkoutkata.api.admin
+      packages-to-scan: com.product.service.checkoutkata.api

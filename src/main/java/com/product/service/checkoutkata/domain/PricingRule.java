@@ -2,6 +2,8 @@ package com.product.service.checkoutkata.domain;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import lombok.ToString;
 
@@ -16,19 +18,24 @@ import lombok.ToString;
 public class PricingRule {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @JsonProperty("id")
   private Long id;
 
   @Column(nullable = false, length = 1)
+  @JsonProperty("sku")
   private String sku;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "rule_type", nullable = false)
+  @JsonProperty("ruleType")
   private RuleType ruleType;
 
   @Column(name = "x_qty")
+  @JsonProperty("xQty")
   private Integer xQty;
 
   @Column(name = "y_price", precision = 12, scale = 2)
+  @JsonProperty("yPrice")
   private BigDecimal yPrice;
 
   protected PricingRule() {}
