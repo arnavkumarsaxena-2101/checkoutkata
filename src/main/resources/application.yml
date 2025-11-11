@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: checkoutkata
+management:
+  endpoints:
+    web:
+      exposure:
+        include: loggers,health,info
+springdoc:
+  server-url: https://api.company.com/checkout
+  api-docs:
+    enabled: true         # GET /v3/api-docs
+  swagger-ui:
+    enabled: true         # GET /swagger-ui/index.html
+    path: /swagger-ui
+  group-configs:
+    - group: checkout
+      packages-to-scan: com.product.service.checkoutkata.api
+    - group: admin
+      packages-to-scan: com.product.service.checkoutkata.api.admin
