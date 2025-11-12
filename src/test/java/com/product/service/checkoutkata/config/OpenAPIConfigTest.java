@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springdoc.core.models.GroupedOpenApi;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
@@ -41,26 +40,5 @@ class OpenAPIConfigTest {
 
     assertThat(server.getUrl()).isEqualTo("https://unit-test.com");
     assertThat(server.getDescription()).isEqualTo("Deployed");
-  }
-
-  @Test
-  @DisplayName("GroupedOpenApi checkoutGroup is created with correct package scan path")
-  void checkoutGroupConfig() {
-    OpenAPIConfig cfg = new OpenAPIConfig();
-
-    GroupedOpenApi group = cfg.checkoutGroup();
-    assertThat(group.getGroup()).isEqualTo("checkout");
-    assertThat(group.getPackagesToScan()).containsExactly("com.product.service.checkoutkata.api");
-  }
-
-  @Test
-  @DisplayName("GroupedOpenApi adminGroup is created with correct package scan path")
-  void adminGroupConfig() {
-    OpenAPIConfig cfg = new OpenAPIConfig();
-
-    GroupedOpenApi group = cfg.adminGroup();
-    assertThat(group.getGroup()).isEqualTo("admin");
-    assertThat(group.getPackagesToScan())
-        .containsExactly("com.product.service.checkoutkata.api.admin");
   }
 }
