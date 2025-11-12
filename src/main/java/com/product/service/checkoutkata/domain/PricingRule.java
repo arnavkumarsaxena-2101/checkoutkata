@@ -33,11 +33,9 @@ public class PricingRule {
   private RuleType ruleType;
 
   @Column(name = "x_qty")
-  @JsonProperty("xQty")
   private Integer xQty;
 
   @Column(name = "y_price", precision = 12, scale = 2)
-  @JsonProperty("yPrice")
   private BigDecimal yPrice;
 
   protected PricingRule() {}
