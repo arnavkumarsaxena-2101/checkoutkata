@@ -1,6 +1,7 @@
 package com.product.service.checkoutkata.domain;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,17 +34,40 @@ public class PricingRule {
   private RuleType ruleType;
 
   @Column(name = "x_qty")
+  @JsonProperty("xQty")
   private Integer xQty;
 
   @Column(name = "y_price", precision = 12, scale = 2)
+  @JsonProperty("yPrice")
   private BigDecimal yPrice;
+
+  @Column(name = "starts_at")
+  private OffsetDateTime startsAt;
+
+  @Column(name = "ends_at")
+  private OffsetDateTime endsAt;
 
   protected PricingRule() {}
 
-  public PricingRule(String sku, RuleType type, Integer xQty, BigDecimal yPrice) {
+  public PricingRule(
+      String sku,
+      RuleType type,
+      Integer xQty,
+      BigDecimal yPrice,
+      OffsetDateTime startsAt,
+      OffsetDateTime endsAt) {
     this.sku = sku;
     this.ruleType = type;
     this.xQty = xQty;
     this.yPrice = yPrice;
+    this.startsAt = startsAt;
+    this.endsAt = endsAt;
+  }
+
+  public boolean isActiveAt(OffsetDateTime at) {
+    if (at == null) at = OffsetDateTime.now();
+    boolean afterStart = (startsAt == null) || !at.isBefore(startsAt);
+    boolean beforeEnd = (endsAt == null) || !at.isAfter(endsAt);
+    return afterStart && beforeEnd;
   }
 }

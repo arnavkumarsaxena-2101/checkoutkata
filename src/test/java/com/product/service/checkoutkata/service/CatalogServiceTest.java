@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,14 @@ class CatalogServiceTest {
 
   @Test
   void rulesFor_shouldDelegateToRepo() {
-    var r = new PricingRule("A", RuleType.BULK_X_FOR_Y, 3, new BigDecimal("130.00"));
+    var r =
+        new PricingRule(
+            "A",
+            RuleType.BULK_X_FOR_Y,
+            3,
+            new BigDecimal("130.00"),
+            OffsetDateTime.now().minusDays(1),
+            OffsetDateTime.now().plusDays(1));
     when(rules.findBySku("A")).thenReturn(List.of(r));
 
     var result = service.rulesFor("A");
@@ -86,8 +94,22 @@ class CatalogServiceTest {
 
   @Test
   void addRule_shouldSaveAndReturnEntity() {
-    var toSave = new PricingRule("B", RuleType.BULK_X_FOR_Y, 2, new BigDecimal("45.00"));
-    var persisted = new PricingRule("B", RuleType.BULK_X_FOR_Y, 2, new BigDecimal("45.00"));
+    var toSave =
+        new PricingRule(
+            "B",
+            RuleType.BULK_X_FOR_Y,
+            2,
+            new BigDecimal("45.00"),
+            OffsetDateTime.now().minusDays(1),
+            OffsetDateTime.now().plusDays(1));
+    var persisted =
+        new PricingRule(
+            "B",
+            RuleType.BULK_X_FOR_Y,
+            2,
+            new BigDecimal("45.00"),
+            OffsetDateTime.now().minusDays(1),
+            OffsetDateTime.now().plusDays(1));
     when(rules.save(toSave)).thenReturn(persisted);
 
     var result = service.addRule(toSave);

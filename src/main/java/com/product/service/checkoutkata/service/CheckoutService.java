@@ -1,6 +1,7 @@
 package com.product.service.checkoutkata.service;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -54,7 +55,10 @@ public class CheckoutService {
               .findBySku(e.getKey())
               .orElseThrow(() -> new NoSuchElementException("Unknown SKU: " + e.getKey()));
       PricingResult res =
-          engine.priceForWithDetails(e.getValue(), p.getUnitPrice(), rules.findBySku(p.getSku()));
+          engine.priceForWithDetails(
+              e.getValue(),
+              p.getUnitPrice(),
+              rules.findActiveBySkuAt(p.getSku(), OffsetDateTime.now()));
       total = total.add(res.total());
       overallOffers.addAll(res.offers());
     }

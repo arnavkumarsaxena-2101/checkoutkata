@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -51,8 +52,8 @@ class CheckoutServiceTest {
   void filtersAndUppercases() {
     when(products.findBySku("A")).thenReturn(Optional.of(product("A", "50.00")));
     when(products.findBySku("B")).thenReturn(Optional.of(product("B", "30.00")));
-    when(rules.findBySku("A")).thenReturn(List.of());
-    when(rules.findBySku("B")).thenReturn(List.of());
+    when(rules.findActiveBySkuAt(eq("A"), any(OffsetDateTime.class))).thenReturn(List.of());
+    when(rules.findActiveBySkuAt(eq("B"), any(OffsetDateTime.class))).thenReturn(List.of());
 
     var total = service.priceOf("a-1B*");
 
@@ -60,8 +61,8 @@ class CheckoutServiceTest {
 
     verify(products, times(1)).findBySku("A");
     verify(products, times(1)).findBySku("B");
-    verify(rules, times(1)).findBySku("A");
-    verify(rules, times(1)).findBySku("B");
+    verify(rules, times(1)).findActiveBySkuAt(eq("A"), any(OffsetDateTime.class));
+    verify(rules, times(1)).findActiveBySkuAt(eq("B"), any(OffsetDateTime.class));
     verifyNoMoreInteractions(products, rules);
   }
 
@@ -69,14 +70,13 @@ class CheckoutServiceTest {
   @DisplayName("Counts per distinct SKU; looks up product/rules once per SKU even if repeated")
   void countsDistinctSkus() {
     when(products.findBySku("B")).thenReturn(Optional.of(product("B", "30.00")));
-    when(rules.findBySku("B")).thenReturn(List.of());
 
     var total = service.priceOf("BBB");
 
     assertThat(total.scale()).isGreaterThanOrEqualTo(2);
 
     verify(products, times(1)).findBySku("B");
-    verify(rules, times(1)).findBySku("B");
+    verify(rules, times(1)).findActiveBySkuAt(eq("B"), any(OffsetDateTime.class));
     verifyNoMoreInteractions(products, rules);
   }
 
@@ -98,7 +98,6 @@ class CheckoutServiceTest {
   void mixedNoBundles() {
     when(products.findBySku("A")).thenReturn(Optional.of(product("A", "50.00")));
     when(products.findBySku("C")).thenReturn(Optional.of(product("C", "20.00")));
-    when(rules.findBySku(anyString())).thenReturn(List.of()); // no specials
 
     var total = service.priceOf("Ca"); // case mix
 
@@ -106,8 +105,8 @@ class CheckoutServiceTest {
 
     verify(products, times(1)).findBySku("A");
     verify(products, times(1)).findBySku("C");
-    verify(rules, times(1)).findBySku("A");
-    verify(rules, times(1)).findBySku("C");
+    verify(rules, times(1)).findActiveBySkuAt(eq("A"), any(OffsetDateTime.class));
+    verify(rules, times(1)).findActiveBySkuAt(eq("C"), any(OffsetDateTime.class));
     verifyNoMoreInteractions(products, rules);
   }
 
@@ -116,12 +115,17 @@ class CheckoutServiceTest {
   void queriesRulesForEachResolvedSku() {
     when(products.findBySku("A")).thenReturn(Optional.of(product("A", "50.00")));
     when(products.findBySku("D")).thenReturn(Optional.of(product("D", "15.00")));
-    when(rules.findBySku(anyString())).thenReturn(List.of());
 
     service.priceOf("AD");
 
     ArgumentCaptor<String> skuCaptor = ArgumentCaptor.forClass(String.class);
-    verify(rules, times(2)).findBySku(skuCaptor.capture());
+    ArgumentCaptor<OffsetDateTime> skuCaptor2 = ArgumentCaptor.forClass(OffsetDateTime.class);
+    verify(rules, times(2)).findActiveBySkuAt(skuCaptor.capture(), skuCaptor2.capture());
     assertThat(skuCaptor.getAllValues()).containsExactlyInAnyOrder("A", "D");
+    assertThat(skuCaptor2.getAllValues())
+        .allSatisfy(
+            dt -> {
+              assertThat(dt).isBeforeOrEqualTo(OffsetDateTime.now());
+            });
   }
 }

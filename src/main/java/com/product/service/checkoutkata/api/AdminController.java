@@ -1,5 +1,7 @@
 package com.product.service.checkoutkata.api;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -86,8 +88,12 @@ public class AdminController {
   @PostMapping("/rules")
   public PricingRule addRule(@RequestBody @Valid PricingRuleDto dto) {
     LOGGER.info("Adding pricing rule for SKU: {}", dto.sku());
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    OffsetDateTime starts = (dto.startsAt() == null) ? now : dto.startsAt();
     PricingRule rule =
-        catalog.addRule(new PricingRule(dto.sku(), dto.ruleType(), dto.xQty(), dto.yPrice()));
+        catalog.addRule(
+            new PricingRule(
+                dto.sku(), dto.ruleType(), dto.xQty(), dto.yPrice(), starts, dto.endsAt()));
     LOGGER.debug("Added pricing rule: {}", rule);
     return rule;
   }

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -70,7 +71,14 @@ class AdminControllerTest {
     @Test
     @DisplayName("should return 200 with pricing rule list")
     void returnsRules() throws Exception {
-      var rule = new PricingRule("A", RuleType.BULK_X_FOR_Y, 3, new BigDecimal("130.00"));
+      var rule =
+          new PricingRule(
+              "A",
+              RuleType.BULK_X_FOR_Y,
+              3,
+              new BigDecimal("130.00"),
+              OffsetDateTime.now().minusDays(1),
+              OffsetDateTime.now().plusDays(1));
       when(catalog.allRules()).thenReturn(List.of(rule));
 
       mvc.perform(get(BASE + "/rules"))
@@ -106,7 +114,13 @@ class AdminControllerTest {
           .andExpect(jsonPath("$.sku").value("A"))
           .andExpect(jsonPath("$.unitPrice").value(50.00));
 
-      verify(catalog).upsertProduct(new Product("A", new BigDecimal("50.00")));
+      // Use argThat to verify fields rather than object identity
+      verify(catalog)
+          .upsertProduct(
+              argThat(
+                  p ->
+                      p.getSku().equals("A")
+                          && p.getUnitPrice().compareTo(new BigDecimal("50.00")) == 0));
       verifyNoMoreInteractions(catalog);
     }
 
@@ -142,8 +156,23 @@ class AdminControllerTest {
     @Test
     @DisplayName("should add BULK_X_FOR_Y rule and return 200")
     void addRuleOk() throws Exception {
-      var dto = new PricingRuleDto("Z", RuleType.BULK_X_FOR_Y, 4, new BigDecimal("130.00"));
-      var saved = new PricingRule("Z", RuleType.BULK_X_FOR_Y, 4, new BigDecimal("130.00"));
+      // PricingRuleDto now supports optional startsAt/endsAt; pass nulls where not required
+      var dto =
+          new PricingRuleDto(
+              "Z",
+              RuleType.BULK_X_FOR_Y,
+              4,
+              new BigDecimal("130.00"),
+              OffsetDateTime.now().minusDays(1),
+              OffsetDateTime.now().plusDays(1));
+      var saved =
+          new PricingRule(
+              "Z",
+              RuleType.BULK_X_FOR_Y,
+              4,
+              new BigDecimal("130.00"),
+              OffsetDateTime.now().minusDays(1),
+              OffsetDateTime.now().plusDays(1));
 
       when(catalog.addRule(any(PricingRule.class))).thenReturn(saved);
 

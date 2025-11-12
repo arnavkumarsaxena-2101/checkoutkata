@@ -3,6 +3,7 @@ package com.product.service.checkoutkata.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,13 @@ class PricingEngineTest {
   private final PricingEngine engine = new PricingEngine();
 
   private static PricingRule bulk(int x, String y) {
-    return new PricingRule("A", RuleType.BULK_X_FOR_Y, x, new BigDecimal(y));
+    return new PricingRule(
+        "A",
+        RuleType.BULK_X_FOR_Y,
+        x,
+        new BigDecimal(y),
+        OffsetDateTime.now().minusDays(1),
+        OffsetDateTime.now().plusDays(1));
   }
 
   @Nested
@@ -89,7 +96,14 @@ class PricingEngineTest {
   class InvalidRules {
     @Test
     void nullXQty_isIgnored() {
-      var bad = new PricingRule("A", RuleType.BULK_X_FOR_Y, null, new BigDecimal("130.00"));
+      var bad =
+          new PricingRule(
+              "A",
+              RuleType.BULK_X_FOR_Y,
+              null,
+              new BigDecimal("130.00"),
+              OffsetDateTime.now().minusDays(1),
+              OffsetDateTime.now().plusDays(1));
       var total = engine.priceFor(3, new BigDecimal("50.00"), List.of(bad));
       // no bundle applied -> 3 * 50
       assertThat(total).isEqualByComparingTo("150.00");
@@ -97,7 +111,14 @@ class PricingEngineTest {
 
     @Test
     void nullYPrice_isIgnored() {
-      var bad = new PricingRule("A", RuleType.BULK_X_FOR_Y, 3, null);
+      var bad =
+          new PricingRule(
+              "A",
+              RuleType.BULK_X_FOR_Y,
+              3,
+              null,
+              OffsetDateTime.now().minusDays(1),
+              OffsetDateTime.now().plusDays(1));
       var total = engine.priceFor(3, new BigDecimal("50.00"), List.of(bad));
       assertThat(total).isEqualByComparingTo("150.00");
     }
