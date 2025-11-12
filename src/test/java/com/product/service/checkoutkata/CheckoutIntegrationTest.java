@@ -1,5 +1,6 @@
 package com.product.service.checkoutkata;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -7,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +59,29 @@ class CheckoutIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body(items)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.total").value(expectedTotal));
+        .andExpect(jsonPath("$.total").value(expectedTotal))
+        // new: response now includes offers array (may be empty)
+        .andExpect(jsonPath("$.offers").isArray());
   }
 
-  static Stream<Arguments> validCases() {
+  @Test
+  @DisplayName("should report applied offers for bundling (AAAB)")
+  void shouldReportAppliedOffersForBundleCase() throws Exception {
+    mvc.perform(
+            post("/api/v1/checkout/price")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body("AAAB")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.total").exists())
+        .andExpect(jsonPath("$.offers").isArray())
+        .andExpect(jsonPath("$.offers.length()").value(greaterThanOrEqualTo(1)))
+        .andExpect(jsonPath("$.offers[0].sku").value("A"))
+        .andExpect(jsonPath("$.offers[0].bundlesApplied").value(1))
+        .andExpect(jsonPath("$.offers[0].bundleSize").value(3))
+        .andExpect(jsonPath("$.offers[0].bundlePrice").value(130.00));
+  }
+
+  static Stream<org.junit.jupiter.params.provider.Arguments> validCases() {
     return Stream.of(
         Arguments.of("A", 50.00),
         Arguments.of("B", 30.00),

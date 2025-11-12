@@ -1,11 +1,11 @@
 package com.product.service.checkoutkata.api;
 
-import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product.service.checkoutkata.service.CheckoutService;
+import com.product.service.checkoutkata.service.PricingResult;
 
 @WebMvcTest(controllers = CheckoutController.class)
 public class CheckoutControllerTest {
@@ -41,7 +42,10 @@ public class CheckoutControllerTest {
     @MethodSource("com.product.service.checkoutkata.api.CheckoutControllerTest#happyCases")
     void shouldComputeTotalsAndCounts(
         String items, BigDecimal stubTotal, Map<String, Integer> expectedCounts) throws Exception {
-      when(checkoutService.priceOf(items)).thenReturn(stubTotal);
+
+      // stub service to return total + empty offers
+      when(checkoutService.priceOfWithDetails(items))
+          .thenReturn(new PricingResult(stubTotal, List.of()));
 
       mvc.perform(
               post("/api/v1/checkout/price")
@@ -56,7 +60,7 @@ public class CheckoutControllerTest {
                   .map(e -> jsonPath("$.itemCounts." + e.getKey()).value(e.getValue()))
                   .toArray(org.springframework.test.web.servlet.ResultMatcher[]::new));
 
-      verify(checkoutService, times(1)).priceOf(items);
+      verify(checkoutService, times(1)).priceOfWithDetails(items);
       verifyNoMoreInteractions(checkoutService);
     }
   }
@@ -73,7 +77,10 @@ public class CheckoutControllerTest {
   void shouldHandleCaseAndNonLetters() throws Exception {
     String items = "abA";
     BigDecimal stubTotal = new BigDecimal("95.00");
-    when(checkoutService.priceOf(items)).thenReturn(stubTotal);
+
+    // stub service: total + no offers
+    when(checkoutService.priceOfWithDetails(items))
+        .thenReturn(new PricingResult(stubTotal, List.of()));
 
     mvc.perform(
             post("/api/v1/checkout/price")
@@ -83,9 +90,10 @@ public class CheckoutControllerTest {
         .andExpect(jsonPath("$.total").value(95.00))
         .andExpect(jsonPath("$.itemCounts.A").value(2))
         .andExpect(jsonPath("$.itemCounts.B").value(1))
-        .andExpect(jsonPath("$.itemCounts").isMap());
+        .andExpect(jsonPath("$.itemCounts").isMap())
+        .andExpect(jsonPath("$.offers").isArray()); // should be present (possibly empty)
 
-    verify(checkoutService).priceOf(items);
+    verify(checkoutService).priceOfWithDetails(items);
     verifyNoMoreInteractions(checkoutService);
   }
 

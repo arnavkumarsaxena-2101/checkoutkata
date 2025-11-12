@@ -54,4 +54,8 @@ public class CatalogService {
   public PricingRule addRule(PricingRule r) {
     return rules.save(r);
   }
+
+  public List<PricingRule> allRules() {
+    return rules.findAll();
+  }
 }

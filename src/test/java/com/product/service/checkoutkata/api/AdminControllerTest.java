@@ -65,9 +65,31 @@ class AdminControllerTest {
   }
 
   @Nested
+  @DisplayName("GET /rules")
+  class ListRules {
+    @Test
+    @DisplayName("should return 200 with pricing rule list")
+    void returnsRules() throws Exception {
+      var rule = new PricingRule("A", RuleType.BULK_X_FOR_Y, 3, new BigDecimal("130.00"));
+      when(catalog.allRules()).thenReturn(List.of(rule));
+
+      mvc.perform(get(BASE + "/rules"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$", hasSize(1)))
+          .andExpect(jsonPath("$[0].sku").value("A"))
+          .andExpect(jsonPath("$[0].ruleType").value("BULK_X_FOR_Y"))
+          .andExpect(jsonPath("$[0].xQty").value(3))
+          .andExpect(jsonPath("$[0].yPrice").value(130.00));
+
+      verify(catalog, times(1)).allRules();
+      verifyNoMoreInteractions(catalog);
+    }
+  }
+
+  @Nested
   @DisplayName("POST /products")
   class UpsertProduct {
-
     @Test
     @DisplayName("should upsert product and return 200")
     void upsertOk() throws Exception {
@@ -117,7 +139,6 @@ class AdminControllerTest {
   @Nested
   @DisplayName("POST /rules")
   class AddRule {
-
     @Test
     @DisplayName("should add BULK_X_FOR_Y rule and return 200")
     void addRuleOk() throws Exception {

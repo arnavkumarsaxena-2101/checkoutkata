@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.ToString;
 
 @Entity
@@ -15,6 +16,7 @@ import lombok.ToString;
             name = "uk_rule_sku_type",
             columnNames = {"sku", "rule_type"}))
 @ToString
+@Getter
 public class PricingRule {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,25 +47,5 @@ public class PricingRule {
     this.ruleType = type;
     this.xQty = xQty;
     this.yPrice = yPrice;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public String getSku() {
-    return sku;
-  }
-
-  public RuleType getRuleType() {
-    return ruleType;
-  }
-
-  public Integer getXQty() {
-    return xQty;
-  }
-
-  public BigDecimal getYPrice() {
-    return yPrice;
   }
 }

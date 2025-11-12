@@ -41,8 +41,3 @@ springdoc:
       - name: Admin
         url: /v3/api-docs/admin
   server-url: ${PUBLIC_BASE_URL:localhost:8080}
-  group-configs:
-    - group: checkout
-      packages-to-scan: com.product.service.checkoutkata.api
-    - group: admin
-      packages-to-scan: com.product.service.checkoutkata.api

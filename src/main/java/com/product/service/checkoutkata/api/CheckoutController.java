@@ -1,6 +1,5 @@
 package com.product.service.checkoutkata.api;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +15,7 @@ import com.product.service.checkoutkata.domain.APIError;
 import com.product.service.checkoutkata.dto.CheckoutRequest;
 import com.product.service.checkoutkata.dto.CheckoutResponse;
 import com.product.service.checkoutkata.service.CheckoutService;
+import com.product.service.checkoutkata.service.PricingResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,14 +70,16 @@ public class CheckoutController {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Raw items payload: '{}'", raw);
     }
-    BigDecimal total = checkout.priceOf(req.items());
+
+    PricingResult result = checkout.priceOfWithDetails(req.items());
+
     Map<String, Integer> counts = new HashMap<>();
-    for (char c : req.items().toCharArray()) {
+    for (char c : (req.items() == null ? "" : req.items()).toCharArray()) {
       String s = String.valueOf(Character.toUpperCase(c));
       if (s.matches("[A-Z]")) counts.merge(s, 1, Integer::sum);
     }
     LOGGER.debug("Item counts computed: {}", counts);
-    LOGGER.info("Pricing completed. Total={}", total);
-    return ResponseEntity.ok(new CheckoutResponse(total, counts));
+    LOGGER.info("Pricing completed. Total={}", result.total());
+    return ResponseEntity.ok(new CheckoutResponse(result.total(), counts, result.offers()));
   }
 }

@@ -91,4 +91,20 @@ public class AdminController {
     LOGGER.debug("Added pricing rule: {}", rule);
     return rule;
   }
+
+  @Operation(
+      summary = "List all pricing rules",
+      description = "Returns all pricing rules across SKUs (for administration and UI).")
+  @ApiResponse(
+      responseCode = "200",
+      description = "OK",
+      content =
+          @Content(array = @ArraySchema(schema = @Schema(implementation = PricingRule.class))))
+  @GetMapping("/rules")
+  public List<PricingRule> rules() {
+    LOGGER.info("Fetching all pricing rules");
+    List<PricingRule> all = catalog.allRules();
+    LOGGER.debug("Fetched rules: {}", all);
+    return all;
+  }
 }
