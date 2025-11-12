@@ -80,11 +80,12 @@ public class AdminController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\"sku\":\"A\",\"ruleType\":\"BULK_X_FOR_Y\",\"xQty\":3,\"yPrice\":130.00}"))))
-  @ApiResponse(
-      responseCode = "200",
-      description = "Created rule",
-      content = @Content(schema = @Schema(implementation = PricingRule.class)))
+                                  "{\"sku\":\"A\","
+                                      + "\"ruleType\":\"BULK_X_FOR_Y\","
+                                      + "\"xQty\":3,"
+                                      + "\"yPrice\":130.00,"
+                                      + "\"startsAt\":\"2025-11-12T00:00:00Z\","
+                                      + "\"endsAt\":\"2025-12-31T23:59:59Z\"}"))))
   @PostMapping("/rules")
   public PricingRule addRule(@RequestBody @Valid PricingRuleDto dto) {
     LOGGER.info("Adding pricing rule for SKU: {}", dto.sku());

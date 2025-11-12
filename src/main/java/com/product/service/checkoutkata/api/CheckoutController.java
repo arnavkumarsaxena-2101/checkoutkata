@@ -65,10 +65,9 @@ public class CheckoutController {
       content = @Content(schema = @Schema(implementation = APIError.class)))
   @PostMapping("/price")
   public ResponseEntity<CheckoutResponse> price(@Valid @RequestBody CheckoutRequest req) {
-    final String raw = (req.items() == null) ? "" : req.items().trim();
     LOGGER.info("Received pricing request");
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Raw items payload: '{}'", raw);
+      LOGGER.debug("Raw items payload: '{}'", req.items());
     }
 
     PricingResult result = checkout.priceOfWithDetails(req.items());

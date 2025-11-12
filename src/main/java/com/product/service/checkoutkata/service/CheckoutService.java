@@ -38,6 +38,8 @@ public class CheckoutService {
     if (itemSequence == null || itemSequence.isBlank()) {
       LOGGER.error("No item sequence found");
       return new PricingResult(BigDecimal.ZERO.setScale(2), List.of());
+    } else {
+      itemSequence = itemSequence.trim();
     }
     Map<String, Integer> counts = new HashMap<>();
     for (char c : itemSequence.toCharArray()) {

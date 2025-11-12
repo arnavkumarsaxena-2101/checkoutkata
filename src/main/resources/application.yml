@@ -36,8 +36,4 @@ springdoc:
     urls:
       - name: All
         url: /v3/api-docs
-      - name: Checkout
-        url: /v3/api-docs/checkout
-      - name: Admin
-        url: /v3/api-docs/admin
   server-url: ${PUBLIC_BASE_URL:localhost:8080}

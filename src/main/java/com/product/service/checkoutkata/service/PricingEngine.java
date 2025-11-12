@@ -36,9 +36,7 @@ public class PricingEngine {
         if (bundles > 0) {
           BigDecimal bundlesTotal = r.getYPrice().multiply(BigDecimal.valueOf(bundles));
           total = total.add(bundlesTotal);
-          int beforeRemainder = remaining % r.getXQty();
           int remainderAfter = remaining % r.getXQty();
-          // compute remainderPrice (will be charged as unitPrice * remainderAfter)
           BigDecimal remainderPrice = unitPrice.multiply(BigDecimal.valueOf(remainderAfter));
           applied.add(
               new OfferApplied(

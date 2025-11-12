@@ -2,7 +2,6 @@ package com.product.service.checkoutkata.config;
 
 import java.util.List;
 
-import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,21 +33,5 @@ public class OpenAPIConfig {
       api.setServers(List.of(new Server().url("http://localhost:8080").description("Local")));
     }
     return api;
-  }
-
-  @Bean
-  GroupedOpenApi checkoutGroup() {
-    return GroupedOpenApi.builder()
-        .group("checkout")
-        .packagesToScan("com.product.service.checkoutkata.api")
-        .build();
-  }
-
-  @Bean
-  GroupedOpenApi adminGroup() {
-    return GroupedOpenApi.builder()
-        .group("admin")
-        .packagesToScan("com.product.service.checkoutkata.api.admin")
-        .build();
   }
 }
